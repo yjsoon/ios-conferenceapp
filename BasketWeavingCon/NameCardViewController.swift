@@ -12,8 +12,14 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "Name Card"
+        navigationItem.largeTitleDisplayMode = .always
         
         setupViews()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        applyDefaultChrome()
     }
     
     private func setupViews() {
@@ -66,5 +72,29 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
+    }
+    
+    private func applyDefaultChrome() {
+        guard let navigationController else { return }
+        navigationController.navigationBar.prefersLargeTitles = true
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        navigationController.navigationBar.standardAppearance = appearance
+        navigationController.navigationBar.scrollEdgeAppearance = appearance
+        navigationController.navigationBar.compactAppearance = appearance
+        navigationController.navigationBar.tintColor = view.tintColor
+        navigationController.view.backgroundColor = .systemBackground
+        navigationController.view.superview?.backgroundColor = .systemBackground
+        view.superview?.backgroundColor = .systemBackground
+        tabBarController?.view.backgroundColor = .systemBackground
+        tabBarController?.view.superview?.backgroundColor = .systemBackground
+        view.window?.backgroundColor = .systemBackground
+        if let tabBar = tabBarController?.tabBar {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithDefaultBackground()
+            appearance.backgroundColor = .white
+            tabBar.standardAppearance = appearance
+            tabBar.scrollEdgeAppearance = appearance
+        }
     }
 }
