@@ -27,6 +27,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8B41F6472DEDD0D5001A66F8 /* Exceptions for "BasketWeavingCon" folder in "BasketWeavingCon" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8B41F6442DEDD0D5001A66F9 /* BasketWeavingCon */;
+		};
 		8BD71C0A2DEE41E000CEDD92 /* Exceptions for "Config" folder in "BasketWeavingCon" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -42,6 +49,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8B41F6472DEDD0D5001A66F9 /* BasketWeavingCon */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8B41F6472DEDD0D5001A66F8 /* Exceptions for "BasketWeavingCon" folder in "BasketWeavingCon" target */,
+			);
 			path = BasketWeavingCon;
 			sourceTree = "<group>";
 		};
