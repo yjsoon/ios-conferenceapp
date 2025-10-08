@@ -18,26 +18,17 @@ class GeneralInfoViewController: UIViewController, UITableViewDelegate, UITableV
         super.viewDidLoad()
         view.backgroundColor = .white
         title = "General Info"
+        navigationItem.largeTitleDisplayMode = .always
         
         setupMapView()
         setupTableView()
-        setupMoreInfoButton()
     }
-    
-    private func setupMoreInfoButton() {
-        let moreInfoButton = UIButton(type: .system)
-        moreInfoButton.setTitle("More Info", for: .normal)
-        moreInfoButton.addTarget(self, action: #selector(showMoreInfo), for: .touchUpInside)
-        
-        view.addSubview(moreInfoButton)
-        moreInfoButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            moreInfoButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 20),
-            moreInfoButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
-    
+
     @objc private func showMoreInfo() {
         let moreInfoVC = MoreInfoViewController()
         navigationController?.pushViewController(moreInfoVC, animated: true)
@@ -70,25 +61,48 @@ class GeneralInfoViewController: UIViewController, UITableViewDelegate, UITableV
             tableView.topAnchor.constraint(equalTo: mapView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -60)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "moreInfoCell")
+        tableView.tableFooterView = UIView()
+        tableView.backgroundColor = .systemBackground
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return eventInfo.count
+        return eventInfo.count + 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        let info = eventInfo[indexPath.row]
-        var content = cell.defaultContentConfiguration()
-        content.text = info.0
-        content.secondaryText = info.1
-        cell.contentConfiguration = content
-        return cell
+        if indexPath.row < eventInfo.count {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            let info = eventInfo[indexPath.row]
+            var content = cell.defaultContentConfiguration()
+            content.text = info.0
+            content.secondaryText = info.1
+            cell.contentConfiguration = content
+            cell.selectionStyle = .none
+            cell.accessoryType = .none
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "moreInfoCell", for: indexPath)
+            var content = cell.defaultContentConfiguration()
+            content.text = "More info"
+            content.textProperties.color = view.tintColor
+            content.secondaryText = nil
+            cell.contentConfiguration = content
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
+            return cell
+        }
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard indexPath.row == eventInfo.count else { return }
+        tableView.deselectRow(at: indexPath, animated: true)
+        showMoreInfo()
     }
 }

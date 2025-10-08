@@ -1,9 +1,18 @@
 
 import UIKit
 
-class TalksPageViewController: UIPageViewController, UIPageViewControllerDataSource {
+class TalksPageViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+
+    init() {
+        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     private var talkViewControllers = [UIViewController]()
+    private let pageControl = UIPageControl()
     
     private let talks = [
         Talk(title: "The Art of Underwater Basket Weaving", speaker: "John Doe", time: "10:00 AM", summary: "A deep dive into the history and techniques of underwater basket weaving."),
@@ -13,18 +22,41 @@ class TalksPageViewController: UIPageViewController, UIPageViewControllerDataSou
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemGroupedBackground
         title = "Upcoming Talks"
-        
+
         dataSource = self
-        
-        for talk in talks {
-            talkViewControllers.append(TalkViewController(talk: talk))
-        }
-        
+        delegate = self
+        configurePages()
+        configurePageControl()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+    
+    private func configurePages() {
+        talkViewControllers = talks.map { TalkViewController(talk: $0) }
         if let firstViewController = talkViewControllers.first {
             setViewControllers([firstViewController], direction: .forward, animated: true, completion: nil)
         }
+        pageControl.numberOfPages = talkViewControllers.count
+        pageControl.currentPage = 0
+    }
+
+    private func configurePageControl() {
+        pageControl.translatesAutoresizingMaskIntoConstraints = false
+        pageControl.currentPageIndicatorTintColor = .label
+        pageControl.pageIndicatorTintColor = UIColor.label.withAlphaComponent(0.2)
+        pageControl.isUserInteractionEnabled = false
+        pageControl.hidesForSinglePage = true
+        view.addSubview(pageControl)
+        view.bringSubviewToFront(pageControl)
+        NSLayoutConstraint.activate([
+            pageControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
@@ -61,5 +93,10 @@ class TalksPageViewController: UIPageViewController, UIPageViewControllerDataSou
         }
         
         return talkViewControllers[nextIndex]
+    }
+
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        guard completed, let currentVC = viewControllers?.first, let index = talkViewControllers.firstIndex(of: currentVC) else { return }
+        pageControl.currentPage = index
     }
 }
