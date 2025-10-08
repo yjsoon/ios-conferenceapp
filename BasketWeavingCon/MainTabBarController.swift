@@ -6,8 +6,6 @@ class MainTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        tabBar.backgroundColor = .white
-        tabBar.isTranslucent = false
     
         let generalInfoVC = GeneralInfoViewController()
         generalInfoVC.tabBarItem = UITabBarItem(title: "Info", image: UIImage(systemName: "info.circle"), tag: 0)
