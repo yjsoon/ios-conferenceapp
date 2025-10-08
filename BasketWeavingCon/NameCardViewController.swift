@@ -2,6 +2,8 @@ import UIKit
 
 class NameCardViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
+    // MARK: - UI Components
+
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let cardContainerView = UIView()
@@ -9,6 +11,8 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
     private let nameTextField = UITextField()
     private let titleTextField = UITextField()
     private let photoButton = UIButton(type: .system)
+
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,11 +33,15 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         navigationController?.navigationBar.prefersLargeTitles = true
     }
 
+    // MARK: - Setup Methods
+
     private func setupScrollView() {
+        // Add scroll view to main view
         view.addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.alwaysBounceVertical = true
 
+        // Pin scroll view to edges of safe area
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -41,19 +49,23 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
 
+        // Add content view inside scroll view
         scrollView.addSubview(contentView)
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
+        // Content view constraints determine scrollable area
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            // Width matches scroll view frame so content doesn't scroll horizontally
             contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
     }
 
     private func setupCardContainer() {
+        // Configure card appearance
         cardContainerView.backgroundColor = .secondarySystemGroupedBackground
         cardContainerView.layer.cornerRadius = 16
         cardContainerView.layer.cornerCurve = .continuous
@@ -61,6 +73,7 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         contentView.addSubview(cardContainerView)
         cardContainerView.translatesAutoresizingMaskIntoConstraints = false
 
+        // Card has padding from screen edges
         NSLayoutConstraint.activate([
             cardContainerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             cardContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
@@ -70,14 +83,15 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
     }
 
     private func setupImageView() {
+        // Configure image view as circular profile photo
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 80
+        imageView.layer.cornerRadius = 80 // Half of width/height for perfect circle
         imageView.backgroundColor = .systemGray5
         imageView.layer.borderWidth = 4
         imageView.layer.borderColor = UIColor.systemBackground.cgColor
 
-        // Add placeholder icon
+        // Add placeholder icon using SF Symbols
         let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .light)
         let placeholderImage = UIImage(systemName: "person.circle.fill", withConfiguration: config)
         imageView.image = placeholderImage
@@ -96,46 +110,28 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
     }
 
     private func setupTextFields() {
-        // Name field
+        // Configure name field
         nameTextField.placeholder = "Your Name"
-        nameTextField.font = .systemFont(ofSize: 17)
-        nameTextField.textAlignment = .center
-        nameTextField.backgroundColor = .tertiarySystemGroupedBackground
-        nameTextField.layer.cornerRadius = 10
-        nameTextField.layer.cornerCurve = .continuous
         nameTextField.autocapitalizationType = .words
         nameTextField.returnKeyType = .next
         nameTextField.delegate = self
+        configureTextField(nameTextField)
 
-        let namePadding = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 44))
-        nameTextField.leftView = namePadding
-        nameTextField.leftViewMode = .always
-        nameTextField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 44))
-        nameTextField.rightViewMode = .always
-
-        // Title field
+        // Configure title field
         titleTextField.placeholder = "Your Title (e.g. Master Weaver)"
-        titleTextField.font = .systemFont(ofSize: 17)
-        titleTextField.textAlignment = .center
-        titleTextField.backgroundColor = .tertiarySystemGroupedBackground
-        titleTextField.layer.cornerRadius = 10
-        titleTextField.layer.cornerCurve = .continuous
         titleTextField.autocapitalizationType = .words
         titleTextField.returnKeyType = .done
         titleTextField.delegate = self
+        configureTextField(titleTextField)
 
-        let titlePadding = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 44))
-        titleTextField.leftView = titlePadding
-        titleTextField.leftViewMode = .always
-        titleTextField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 44))
-        titleTextField.rightViewMode = .always
-
+        // Add to container
         cardContainerView.addSubview(nameTextField)
         cardContainerView.addSubview(titleTextField)
 
         nameTextField.translatesAutoresizingMaskIntoConstraints = false
         titleTextField.translatesAutoresizingMaskIntoConstraints = false
 
+        // Layout text fields below image view
         NSLayoutConstraint.activate([
             nameTextField.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 32),
             nameTextField.leadingAnchor.constraint(equalTo: cardContainerView.leadingAnchor, constant: 20),
@@ -149,7 +145,27 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         ])
     }
 
+    /// Helper method to configure common text field styling
+    /// This reduces code duplication between name and title fields
+    private func configureTextField(_ textField: UITextField) {
+        textField.font = .systemFont(ofSize: 17)
+        textField.textAlignment = .center
+        textField.backgroundColor = .tertiarySystemGroupedBackground
+        textField.layer.cornerRadius = 10
+        textField.layer.cornerCurve = .continuous
+
+        // Add padding using invisible views on left and right
+        let leftPadding = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 44))
+        textField.leftView = leftPadding
+        textField.leftViewMode = .always
+
+        let rightPadding = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 44))
+        textField.rightView = rightPadding
+        textField.rightViewMode = .always
+    }
+
     private func setupPhotoButton() {
+        // Use iOS 26 Liquid Glass button style for premium look
         var config = UIButton.Configuration.prominentGlass()
         config.title = "Change Photo"
         config.image = UIImage(systemName: "camera.fill")
@@ -170,8 +186,9 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
     }
 
     private func setupKeyboardDismissal() {
+        // Add tap gesture to dismiss keyboard when tapping outside text fields
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
+        tapGesture.cancelsTouchesInView = false // Allow other views to still receive touches
         view.addGestureRecognizer(tapGesture)
     }
 
@@ -179,24 +196,28 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         view.endEditing(true)
     }
 
+    // MARK: - Photo Selection
+
     @objc private func photoButtonTapped() {
+        // Show action sheet to choose between camera or photo library
         let alert = UIAlertController(title: "Choose Photo Source", message: nil, preferredStyle: .actionSheet)
 
-        // Camera option
+        // Only show camera option if device has a camera (simulators don't)
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             alert.addAction(UIAlertAction(title: "Take Photo", style: .default) { [weak self] _ in
+                // [weak self] prevents memory leak (retain cycle)
                 self?.presentImagePicker(sourceType: .camera)
             })
         }
 
-        // Photo library option
+        // Photo library is always available
         alert.addAction(UIAlertAction(title: "Choose from Library", style: .default) { [weak self] _ in
             self?.presentImagePicker(sourceType: .photoLibrary)
         })
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-        // For iPad
+        // On iPad, action sheets need a source view (where the popover points to)
         if let popoverController = alert.popoverPresentationController {
             popoverController.sourceView = photoButton
             popoverController.sourceRect = photoButton.bounds
@@ -205,36 +226,51 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         present(alert, animated: true)
     }
 
+    /// Presents the image picker with specified source (camera or photo library)
     private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
         let picker = UIImagePickerController()
-        picker.delegate = self
+        picker.delegate = self // We implement UIImagePickerControllerDelegate to receive callbacks
         picker.sourceType = sourceType
-        picker.allowsEditing = true
+        picker.allowsEditing = true // Lets user crop/edit photo before selecting
         present(picker, animated: true)
     }
 
+    // MARK: - UIImagePickerControllerDelegate
+
+    /// Called when user selects a photo from the picker
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        // Try to get edited image first (if user cropped it)
         if let editedImage = info[.editedImage] as? UIImage {
             imageView.image = editedImage
             imageView.contentMode = .scaleAspectFill
-        } else if let originalImage = info[.originalImage] as? UIImage {
+        }
+        // Fall back to original image if no editing was done
+        else if let originalImage = info[.originalImage] as? UIImage {
             imageView.image = originalImage
             imageView.contentMode = .scaleAspectFill
         }
+
+        // Dismiss the picker after selection
         picker.dismiss(animated: true)
     }
 
+    /// Called when user cancels photo selection
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
 }
 
+// MARK: - UITextFieldDelegate
+
 extension NameCardViewController: UITextFieldDelegate {
+    /// Handle return key press on text fields
+    /// Return key on name field moves to title field
+    /// Return key on title field dismisses keyboard
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == nameTextField {
-            titleTextField.becomeFirstResponder()
+            titleTextField.becomeFirstResponder() // Move to next field
         } else {
-            textField.resignFirstResponder()
+            textField.resignFirstResponder() // Dismiss keyboard
         }
         return true
     }
