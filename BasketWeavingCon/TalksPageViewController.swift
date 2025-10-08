@@ -23,7 +23,7 @@ class TalksPageViewController: UIPageViewController, UIPageViewControllerDataSou
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemGroupedBackground
-        title = "Upcoming Talks"
+        title = "Talks"
 
         dataSource = self
         delegate = self
