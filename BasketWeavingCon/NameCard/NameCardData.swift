@@ -11,7 +11,7 @@ class NameCardData {
 
     private let defaults = UserDefaults.standard
     private let nameKey = "nameCard.name"
-    private let titleKey = "nameCard.title"
+    private let emailKey = "nameCard.email"
     private let photoFilename = "nameCardPhoto.jpg"
 
     var name: String {
@@ -19,9 +19,9 @@ class NameCardData {
         set { defaults.set(newValue, forKey: nameKey) }
     }
 
-    var title: String {
-        get { defaults.string(forKey: titleKey) ?? "" }
-        set { defaults.set(newValue, forKey: titleKey) }
+    var email: String {
+        get { defaults.string(forKey: emailKey) ?? "" }
+        set { defaults.set(newValue, forKey: emailKey) }
     }
 
     var photo: UIImage? {

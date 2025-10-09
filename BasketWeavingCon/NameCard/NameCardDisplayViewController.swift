@@ -10,7 +10,7 @@ class NameCardDisplayViewController: UIViewController {
     private let cardContainerView = UIView()
     private let photoImageView = UIImageView()
     private let nameLabel = UILabel()
-    private let titleLabel = UILabel()
+    private let emailLabel = UILabel()
     private let qrCodeImageView = UIImageView()
 
     // MARK: - Lifecycle
@@ -32,7 +32,7 @@ class NameCardDisplayViewController: UIViewController {
         setupCardContainer()
         setupPhotoImageView()
         setupNameLabel()
-        setupTitleLabel()
+        setupEmailLabel()
         setupQRCodeImageView()
 
         loadData()
@@ -129,20 +129,20 @@ class NameCardDisplayViewController: UIViewController {
         ])
     }
 
-    private func setupTitleLabel() {
-        titleLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
-        titleLabel.textColor = .secondaryLabel
-        titleLabel.text = "Your Title"
+    private func setupEmailLabel() {
+        emailLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        emailLabel.textAlignment = .center
+        emailLabel.numberOfLines = 0
+        emailLabel.textColor = .secondaryLabel
+        emailLabel.text = "your.email@example.com"
 
-        cardContainerView.addSubview(titleLabel)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardContainerView.addSubview(emailLabel)
+        emailLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
-            titleLabel.leadingAnchor.constraint(equalTo: cardContainerView.leadingAnchor, constant: 20),
-            titleLabel.trailingAnchor.constraint(equalTo: cardContainerView.trailingAnchor, constant: -20)
+            emailLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
+            emailLabel.leadingAnchor.constraint(equalTo: cardContainerView.leadingAnchor, constant: 20),
+            emailLabel.trailingAnchor.constraint(equalTo: cardContainerView.trailingAnchor, constant: -20)
         ])
     }
 
@@ -159,7 +159,7 @@ class NameCardDisplayViewController: UIViewController {
         qrCodeImageView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            qrCodeImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
+            qrCodeImageView.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: 32),
             qrCodeImageView.centerXAnchor.constraint(equalTo: cardContainerView.centerXAnchor),
             qrCodeImageView.widthAnchor.constraint(equalToConstant: 200),
             qrCodeImageView.heightAnchor.constraint(equalToConstant: 200),
@@ -175,7 +175,7 @@ class NameCardDisplayViewController: UIViewController {
 
         // Update labels
         nameLabel.text = data.name.isEmpty ? "Your Name" : data.name
-        titleLabel.text = data.title.isEmpty ? "Your Title" : data.title
+        emailLabel.text = data.email.isEmpty ? "your.email@example.com" : data.email
 
         // Update photo
         if let photo = data.photo {
@@ -193,12 +193,20 @@ class NameCardDisplayViewController: UIViewController {
         updateQRCode()
     }
 
-    /// Generate QR code containing name and title
+    /// Generate QR code containing name and email in vCard format
     private func updateQRCode() {
         let data = NameCardData.shared
-        let qrString = "Name: \(data.name)\nTitle: \(data.title)"
 
-        if let qrImage = generateQRCode(from: qrString) {
+        // Use vCard format for better QR code scanning compatibility
+        let vCard = """
+        BEGIN:VCARD
+        VERSION:3.0
+        FN:\(data.name)
+        EMAIL:\(data.email)
+        END:VCARD
+        """
+
+        if let qrImage = generateQRCode(from: vCard) {
             qrCodeImageView.image = qrImage
         }
     }
@@ -237,12 +245,12 @@ class NameCardDisplayViewController: UIViewController {
 
     @objc private func editTapped() {
         let data = NameCardData.shared
-        let editVC = NameCardEditViewController(name: data.name, title: data.title, photo: data.photo)
+        let editVC = NameCardEditViewController(name: data.name, email: data.email, photo: data.photo)
 
         // Handle save callback
-        editVC.onSave = { [weak self] name, title, photo in
+        editVC.onSave = { [weak self] name, email, photo in
             NameCardData.shared.name = name
-            NameCardData.shared.title = title
+            NameCardData.shared.email = email
             NameCardData.shared.photo = photo
             self?.loadData()
         }

@@ -15,17 +15,17 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
     private let cardContainerView = UIView()
     private let imageView = UIImageView()
     private let nameTextField = UITextField()
-    private let titleTextField = UITextField()
+    private let emailTextField = UITextField()
     private let photoButton = UIButton(type: .system)
 
     // MARK: - Lifecycle
 
-    init(name: String = "", title: String = "", photo: UIImage? = nil) {
+    init(name: String = "", email: String = "", photo: UIImage? = nil) {
         super.init(nibName: nil, bundle: nil)
 
         // Store initial values to populate fields
         nameTextField.text = name
-        titleTextField.text = title
+        emailTextField.text = email
         if let photo = photo {
             selectedImage = photo
         }
@@ -72,8 +72,8 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
     @objc private func doneTapped() {
         // Save the data and dismiss
         let name = nameTextField.text ?? ""
-        let title = titleTextField.text ?? ""
-        onSave?(name, title, selectedImage)
+        let email = emailTextField.text ?? ""
+        onSave?(name, email, selectedImage)
         dismiss(animated: true)
     }
 
@@ -161,19 +161,20 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
         nameTextField.delegate = self
         configureTextField(nameTextField)
 
-        // Configure title field
-        titleTextField.placeholder = "Your Title (e.g. Master Weaver)"
-        titleTextField.autocapitalizationType = .words
-        titleTextField.returnKeyType = .done
-        titleTextField.delegate = self
-        configureTextField(titleTextField)
+        // Configure email field
+        emailTextField.placeholder = "your.email@example.com"
+        emailTextField.autocapitalizationType = .none
+        emailTextField.keyboardType = .emailAddress
+        emailTextField.returnKeyType = .done
+        emailTextField.delegate = self
+        configureTextField(emailTextField)
 
         // Add to container
         cardContainerView.addSubview(nameTextField)
-        cardContainerView.addSubview(titleTextField)
+        cardContainerView.addSubview(emailTextField)
 
         nameTextField.translatesAutoresizingMaskIntoConstraints = false
-        titleTextField.translatesAutoresizingMaskIntoConstraints = false
+        emailTextField.translatesAutoresizingMaskIntoConstraints = false
 
         // Layout text fields below image view
         NSLayoutConstraint.activate([
@@ -182,10 +183,10 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
             nameTextField.trailingAnchor.constraint(equalTo: cardContainerView.trailingAnchor, constant: -20),
             nameTextField.heightAnchor.constraint(equalToConstant: 50),
 
-            titleTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 12),
-            titleTextField.leadingAnchor.constraint(equalTo: cardContainerView.leadingAnchor, constant: 20),
-            titleTextField.trailingAnchor.constraint(equalTo: cardContainerView.trailingAnchor, constant: -20),
-            titleTextField.heightAnchor.constraint(equalToConstant: 50)
+            emailTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 12),
+            emailTextField.leadingAnchor.constraint(equalTo: cardContainerView.leadingAnchor, constant: 20),
+            emailTextField.trailingAnchor.constraint(equalTo: cardContainerView.trailingAnchor, constant: -20),
+            emailTextField.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 
@@ -223,7 +224,7 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
         photoButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            photoButton.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 32),
+            photoButton.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 32),
             photoButton.centerXAnchor.constraint(equalTo: cardContainerView.centerXAnchor),
             photoButton.bottomAnchor.constraint(equalTo: cardContainerView.bottomAnchor, constant: -32)
         ])
@@ -310,11 +311,11 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
 
 extension NameCardEditViewController: UITextFieldDelegate {
     /// Handle return key press on text fields
-    /// Return key on name field moves to title field
-    /// Return key on title field dismisses keyboard
+    /// Return key on name field moves to email field
+    /// Return key on email field dismisses keyboard
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == nameTextField {
-            titleTextField.becomeFirstResponder() // Move to next field
+            emailTextField.becomeFirstResponder() // Move to next field
         } else {
             textField.resignFirstResponder() // Dismiss keyboard
         }
