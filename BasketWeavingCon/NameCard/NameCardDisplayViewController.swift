@@ -1,6 +1,7 @@
 import UIKit
 
-/// Displays name card with photo, name, title, and QR code
+/// Displays name card with photo, name, email, and auto-generated QR code
+/// Read-only view - tap Edit to modify details
 class NameCardDisplayViewController: UIViewController {
 
     // MARK: - UI Components
@@ -21,7 +22,10 @@ class NameCardDisplayViewController: UIViewController {
         title = "Name Card"
         navigationItem.largeTitleDisplayMode = .always
 
-        // Add Edit button in toolbar
+        // UIBarButtonItem with system icon and action
+        // target: self = this view controller handles the action
+        // action: #selector = converts method name to Objective-C selector
+        // @objc is required on the method for #selector to work
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .edit,
             target: self,
@@ -42,7 +46,8 @@ class NameCardDisplayViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
 
-        // Reload data in case it was edited
+        // viewWillAppear called every time view appears (including after modal dismissal)
+        // Reload data in case it was edited in the modal
         loadData()
     }
 
@@ -197,7 +202,10 @@ class NameCardDisplayViewController: UIViewController {
     private func updateQRCode() {
         let data = NameCardData.shared
 
-        // Use vCard format for better QR code scanning compatibility
+        // vCard is a standard format for business cards
+        // When scanned, phone apps recognize it and offer to save as contact
+        // """ is a multi-line string literal (Swift 4+)
+        // \(data.name) = string interpolation (insert variable into string)
         let vCard = """
         BEGIN:VCARD
         VERSION:3.0
@@ -212,29 +220,41 @@ class NameCardDisplayViewController: UIViewController {
     }
 
     /// Generate QR code image using Core Image
+    /// Core Image is Apple's built-in image processing framework
+    /// CIFilter = image filter (blur, color adjust, QR generation, etc.)
     /// - Parameter string: The text to encode in the QR code
     /// - Returns: UIImage with the QR code, or nil if generation fails
     private func generateQRCode(from string: String) -> UIImage? {
-        // Convert string to data
+        // Convert string to Data (binary format required by filter)
+        // .utf8 encoding handles international characters correctly
         guard let data = string.data(using: .utf8) else { return nil }
 
-        // Create QR code filter
+        // CIFilter(name:) creates filter by name
+        // "CIQRCodeGenerator" is built into iOS, no external library needed
         guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
 
-        // Set input data
+        // Set the data to encode
+        // Key-value coding: filters use string keys to set parameters
         filter.setValue(data, forKey: "inputMessage")
 
-        // Set error correction level (L = 7%, M = 15%, Q = 25%, H = 30%)
+        // Error correction adds redundancy so damaged QR codes still scan
+        // L = 7% (smallest QR), M = 15%, Q = 25%, H = 30% (largest QR)
+        // Higher level = more damage tolerance but larger code
         filter.setValue("M", forKey: "inputCorrectionLevel")
 
-        // Get the output image
+        // Get the generated QR code as CIImage (Core Image format)
         guard let ciImage = filter.outputImage else { return nil }
 
-        // Scale up the QR code (default is tiny)
+        // QR codes generate at a very small size (e.g., 27x27 pixels)
+        // CGAffineTransform scales it up 10x to be visible
+        // scaleX/Y: how much to multiply width/height
         let transform = CGAffineTransform(scaleX: 10, y: 10)
         let scaledImage = ciImage.transformed(by: transform)
 
-        // Convert CIImage to UIImage
+        // Convert from CIImage → CGImage → UIImage
+        // CIImage = Core Image format (for processing)
+        // CGImage = Core Graphics format (bitmap)
+        // UIImage = UIKit format (for display in UIImageView)
         let context = CIContext()
         guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
 
@@ -243,19 +263,35 @@ class NameCardDisplayViewController: UIViewController {
 
     // MARK: - Actions
 
+    /// Called when Edit button is tapped
+    /// @objc required because we use #selector in viewDidLoad
+    /// #selector is Objective-C feature for target-action pattern
     @objc private func editTapped() {
         let data = NameCardData.shared
+
+        // Create edit view controller with current data
         let editVC = NameCardEditViewController(name: data.name, email: data.email, photo: data.photo)
 
-        // Handle save callback
+        // Closure (anonymous function) that runs when user taps Done in edit modal
+        // { parameters in code } syntax
+        // [weak self] = capture list to prevent retain cycle (memory leak)
+        // Without weak: editVC holds closure → closure holds self → self holds editVC = cycle!
+        // With weak: closure holds weak reference, breaks cycle
         editVC.onSave = { [weak self] name, email, photo in
+            // Save to singleton model
             NameCardData.shared.name = name
             NameCardData.shared.email = email
             NameCardData.shared.photo = photo
+
+            // self? = optional chaining (safe unwrap)
+            // If self is nil (view controller deallocated), this does nothing
+            // If self exists, call loadData() to refresh UI
             self?.loadData()
         }
 
-        // Present as modal with navigation controller
+        // Modal presentation: slides up from bottom, user must dismiss to return
+        // Wrap edit VC in navigation controller so it has a navigation bar
+        // Navigation bar shows title and Done button
         let navController = UINavigationController(rootViewController: editVC)
         navController.navigationBar.prefersLargeTitles = true
         present(navController, animated: true)

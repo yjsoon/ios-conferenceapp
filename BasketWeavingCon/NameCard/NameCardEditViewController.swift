@@ -1,11 +1,17 @@
 import UIKit
 
-/// Edit modal for name card - allows user to change photo, name, and title
+/// Edit modal for name card - allows user to change photo, name, and email
+/// Presented modally from NameCardDisplayViewController
 class NameCardEditViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     // MARK: - Properties
 
+    // Closure property that gets called when user taps Done
+    // Type: ((String, String, UIImage?) -> Void)?
+    // Translation: "optional closure that takes 3 parameters and returns nothing"
+    // Why optional? Parent sets this after creation, might not be set
     var onSave: ((String, String, UIImage?) -> Void)?
+
     private var selectedImage: UIImage?
 
     // MARK: - UI Components
@@ -20,10 +26,13 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
 
     // MARK: - Lifecycle
 
+    /// Custom initializer to pass in existing data for editing
+    /// Default parameters (= "") allow calling init() with no arguments
+    /// Example: init() or init(name: "John") or init(name: "John", email: "test@test.com")
     init(name: String = "", email: String = "", photo: UIImage? = nil) {
         super.init(nibName: nil, bundle: nil)
 
-        // Store initial values to populate fields
+        // Set text field values (happens before viewDidLoad)
         nameTextField.text = name
         emailTextField.text = email
         if let photo = photo {
@@ -31,6 +40,9 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
         }
     }
 
+    /// Required by UIViewController when you implement a custom init
+    /// This init is for loading from Storyboards/XIBs (we don't use those)
+    /// fatalError() crashes if somehow called - forces you to use init(name:email:photo:)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -41,7 +53,8 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
         title = "Edit Name Card"
         navigationItem.largeTitleDisplayMode = .always
 
-        // Add Done button for modal presentation
+        // Done button dismisses modal and saves changes
+        // .done shows checkmark icon
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
@@ -55,7 +68,7 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
         setupPhotoButton()
         setupKeyboardDismissal()
 
-        // Load initial values into UI
+        // Apply selectedImage if it was passed in init
         if let image = selectedImage {
             imageView.image = image
             imageView.contentMode = .scaleAspectFill
@@ -70,10 +83,18 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
     // MARK: - Actions
 
     @objc private func doneTapped() {
-        // Save the data and dismiss
+        // Get values from text fields
+        // textField.text is optional (might be nil)
+        // ?? "" means "if nil, use empty string instead"
         let name = nameTextField.text ?? ""
         let email = emailTextField.text ?? ""
+
+        // Call the closure if it was set by parent
+        // onSave? = optional chaining: only call if not nil
+        // If nil, this line does nothing (no crash)
         onSave?(name, email, selectedImage)
+
+        // Dismiss modal and return to display view
         dismiss(animated: true)
     }
 
