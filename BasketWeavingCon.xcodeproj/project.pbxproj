@@ -23,7 +23,7 @@
 
 /* Begin PBXFileReference section */
 		8B41F6452DEDD0D5001A66F9 /* BasketWeavingCon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BasketWeavingCon.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8B41F65C2DEDD0D6001A66F9 /* BasketWeavingCon.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasketWeavingCon.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B41F65C2DEDD0D6001A66F9 /* .xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = .xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -40,7 +40,6 @@
 				Debug.xcconfig,
 				Release.xcconfig,
 				Shared.xcconfig,
-				Tests.xcconfig,
 			);
 			target = 8B41F6442DEDD0D5001A66F9 /* BasketWeavingCon */;
 		};
@@ -105,7 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				8B41F6452DEDD0D5001A66F9 /* BasketWeavingCon.app */,
-				8B41F65C2DEDD0D6001A66F9 /* BasketWeavingCon.xctest */,
+				8B41F65C2DEDD0D6001A66F9 /* .xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -165,7 +164,7 @@
 				8B41F6822DEDD23B001A66F9 /* BasketWeavingConFeature */,
 			);
 			productName = BasketWeavingConUITests;
-			productReference = 8B41F65C2DEDD0D6001A66F9 /* BasketWeavingCon.xctest */;
+			productReference = 8B41F65C2DEDD0D6001A66F9 /* .xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
