@@ -1,16 +1,27 @@
 import UIKit
 
+/// Protocol for communicating name card edits back to the display view
+/// Using protocol-delegate pattern instead of closures for better separation of concerns
+protocol NameCardEditViewControllerDelegate: AnyObject {
+    /// Called when user taps Done to save changes
+    /// - Parameters:
+    ///   - name: The updated name
+    ///   - email: The updated email
+    ///   - photo: The updated photo (optional)
+    func nameCardEditDidSave(name: String, email: String, photo: UIImage?)
+}
+
 /// Edit modal for name card - allows user to change photo, name, and email
 /// Presented modally from NameCardDisplayViewController
 class NameCardEditViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     // MARK: - Properties
 
-    // Closure property that gets called when user taps Done
-    // Type: ((String, String, UIImage?) -> Void)?
-    // Translation: "optional closure that takes 3 parameters and returns nothing"
-    // Why optional? Parent sets this after creation, might not be set
-    var onSave: ((String, String, UIImage?) -> Void)?
+    // Delegate property for communicating changes back to display view
+    // weak: prevents retain cycle (display view owns edit view, edit view references display view)
+    // AnyObject: ensures delegate is a class (required for weak reference)
+    // Protocol conformance checked at compile time for type safety
+    weak var delegate: NameCardEditViewControllerDelegate?
 
     private var selectedImage: UIImage?
 
@@ -89,10 +100,10 @@ class NameCardEditViewController: UIViewController, UIImagePickerControllerDeleg
         let name = nameTextField.text ?? ""
         let email = emailTextField.text ?? ""
 
-        // Call the closure if it was set by parent
-        // onSave? = optional chaining: only call if not nil
-        // If nil, this line does nothing (no crash)
-        onSave?(name, email, selectedImage)
+        // Call delegate method if delegate is set
+        // delegate? = optional chaining: only call if not nil
+        // Using protocol-delegate pattern provides better compile-time safety
+        delegate?.nameCardEditDidSave(name: name, email: email, photo: selectedImage)
 
         // Dismiss modal and return to display view
         dismiss(animated: true)

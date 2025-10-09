@@ -2,7 +2,7 @@ import UIKit
 
 /// Displays name card with photo, name, email, and auto-generated QR code
 /// Read-only view - tap Edit to modify details
-class NameCardDisplayViewController: UIViewController {
+class NameCardDisplayViewController: UIViewController, NameCardEditViewControllerDelegate {
 
     // MARK: - UI Components
 
@@ -23,9 +23,6 @@ class NameCardDisplayViewController: UIViewController {
         navigationItem.largeTitleDisplayMode = .always
 
         // UIBarButtonItem with system icon and action
-        // target: self = this view controller handles the action
-        // action: #selector = converts method name to Objective-C selector
-        // @objc is required on the method for #selector to work
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .edit,
             target: self,
@@ -174,16 +171,19 @@ class NameCardDisplayViewController: UIViewController {
 
     // MARK: - Data Loading
 
-    /// Load data from NameCardData and update UI
+    /// Load data from UserDefaults and update UI
     private func loadData() {
-        let data = NameCardData.shared
+        // Load data using static helper methods
+        let name = NameCardData.loadName()
+        let email = NameCardData.loadEmail()
+        let photo = NameCardData.loadPhoto()
 
         // Update labels
-        nameLabel.text = data.name.isEmpty ? "Your Name" : data.name
-        emailLabel.text = data.email.isEmpty ? "your.email@example.com" : data.email
+        nameLabel.text = name.isEmpty ? "Your Name" : name
+        emailLabel.text = email.isEmpty ? "your.email@example.com" : email
 
         // Update photo
-        if let photo = data.photo {
+        if let photo = photo {
             photoImageView.image = photo
             photoImageView.contentMode = .scaleAspectFill
         } else {
@@ -200,17 +200,19 @@ class NameCardDisplayViewController: UIViewController {
 
     /// Generate QR code containing name and email in vCard format
     private func updateQRCode() {
-        let data = NameCardData.shared
+        // Load current data from UserDefaults
+        let name = NameCardData.loadName()
+        let email = NameCardData.loadEmail()
 
         // vCard is a standard format for business cards
         // When scanned, phone apps recognize it and offer to save as contact
         // """ is a multi-line string literal (Swift 4+)
-        // \(data.name) = string interpolation (insert variable into string)
+        // \(name) = string interpolation (insert variable into string)
         let vCard = """
         BEGIN:VCARD
         VERSION:3.0
-        FN:\(data.name)
-        EMAIL:\(data.email)
+        FN:\(name)
+        EMAIL:\(email)
         END:VCARD
         """
 
@@ -264,30 +266,19 @@ class NameCardDisplayViewController: UIViewController {
     // MARK: - Actions
 
     /// Called when Edit button is tapped
-    /// @objc required because we use #selector in viewDidLoad
-    /// #selector is Objective-C feature for target-action pattern
     @objc private func editTapped() {
-        let data = NameCardData.shared
+        // Load current data from UserDefaults
+        let name = NameCardData.loadName()
+        let email = NameCardData.loadEmail()
+        let photo = NameCardData.loadPhoto()
 
         // Create edit view controller with current data
-        let editVC = NameCardEditViewController(name: data.name, email: data.email, photo: data.photo)
+        let editVC = NameCardEditViewController(name: name, email: email, photo: photo)
 
-        // Closure (anonymous function) that runs when user taps Done in edit modal
-        // { parameters in code } syntax
-        // [weak self] = capture list to prevent retain cycle (memory leak)
-        // Without weak: editVC holds closure → closure holds self → self holds editVC = cycle!
-        // With weak: closure holds weak reference, breaks cycle
-        editVC.onSave = { [weak self] name, email, photo in
-            // Save to singleton model
-            NameCardData.shared.name = name
-            NameCardData.shared.email = email
-            NameCardData.shared.photo = photo
-
-            // self? = optional chaining (safe unwrap)
-            // If self is nil (view controller deallocated), this does nothing
-            // If self exists, call loadData() to refresh UI
-            self?.loadData()
-        }
+        // Set delegate using protocol-delegate pattern
+        // More traditional UIKit pattern than closures
+        // Benefits: compile-time checking, clear contract via protocol
+        editVC.delegate = self
 
         // Modal presentation: slides up from bottom, user must dismiss to return
         // Wrap edit VC in navigation controller so it has a navigation bar
@@ -295,5 +286,24 @@ class NameCardDisplayViewController: UIViewController {
         let navController = UINavigationController(rootViewController: editVC)
         navController.navigationBar.prefersLargeTitles = true
         present(navController, animated: true)
+    }
+}
+
+// MARK: - NameCardEditViewControllerDelegate
+
+extension NameCardDisplayViewController {
+    /// Protocol method called when user saves changes in edit modal
+    /// - Parameters:
+    ///   - name: Updated name
+    ///   - email: Updated email
+    ///   - photo: Updated photo (optional)
+    func nameCardEditDidSave(name: String, email: String, photo: UIImage?) {
+        // Save directly to UserDefaults using static helper methods
+        NameCardData.saveName(name)
+        NameCardData.saveEmail(email)
+        NameCardData.savePhoto(photo)
+
+        // Refresh UI with new data
+        loadData()
     }
 }
