@@ -1,6 +1,12 @@
 import UIKit
 
-class NameCardViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+/// Edit modal for name card - allows user to change photo, name, and title
+class NameCardEditViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+
+    // MARK: - Properties
+
+    var onSave: ((String, String, UIImage?) -> Void)?
+    private var selectedImage: UIImage?
 
     // MARK: - UI Components
 
@@ -14,11 +20,33 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
 
     // MARK: - Lifecycle
 
+    init(name: String = "", title: String = "", photo: UIImage? = nil) {
+        super.init(nibName: nil, bundle: nil)
+
+        // Store initial values to populate fields
+        nameTextField.text = name
+        titleTextField.text = title
+        if let photo = photo {
+            selectedImage = photo
+        }
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemGroupedBackground
-        title = "Name Card"
+        title = "Edit Name Card"
         navigationItem.largeTitleDisplayMode = .always
+
+        // Add Done button for modal presentation
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(doneTapped)
+        )
 
         setupScrollView()
         setupCardContainer()
@@ -26,11 +54,27 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
         setupTextFields()
         setupPhotoButton()
         setupKeyboardDismissal()
+
+        // Load initial values into UI
+        if let image = selectedImage {
+            imageView.image = image
+            imageView.contentMode = .scaleAspectFill
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
+    }
+
+    // MARK: - Actions
+
+    @objc private func doneTapped() {
+        // Save the data and dismiss
+        let name = nameTextField.text ?? ""
+        let title = titleTextField.text ?? ""
+        onSave?(name, title, selectedImage)
+        dismiss(animated: true)
     }
 
     // MARK: - Setup Methods
@@ -241,11 +285,13 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         // Try to get edited image first (if user cropped it)
         if let editedImage = info[.editedImage] as? UIImage {
+            selectedImage = editedImage
             imageView.image = editedImage
             imageView.contentMode = .scaleAspectFill
         }
         // Fall back to original image if no editing was done
         else if let originalImage = info[.originalImage] as? UIImage {
+            selectedImage = originalImage
             imageView.image = originalImage
             imageView.contentMode = .scaleAspectFill
         }
@@ -262,7 +308,7 @@ class NameCardViewController: UIViewController, UIImagePickerControllerDelegate,
 
 // MARK: - UITextFieldDelegate
 
-extension NameCardViewController: UITextFieldDelegate {
+extension NameCardEditViewController: UITextFieldDelegate {
     /// Handle return key press on text fields
     /// Return key on name field moves to title field
     /// Return key on title field dismisses keyboard

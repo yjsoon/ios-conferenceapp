@@ -54,11 +54,6 @@
 			path = BasketWeavingCon;
 			sourceTree = "<group>";
 		};
-		8B41F65F2DEDD0D6001A66F9 /* BasketWeavingConUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BasketWeavingConUITests;
-			sourceTree = "<group>";
-		};
 		8BD71C052DEE41D800CEDD92 /* Config */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -94,7 +89,6 @@
 			children = (
 				8BD71C052DEE41D800CEDD92 /* Config */,
 				8B41F6472DEDD0D5001A66F9 /* BasketWeavingCon */,
-				8B41F65F2DEDD0D6001A66F9 /* BasketWeavingConUITests */,
 				8B41F6812DEDD23B001A66F9 /* Frameworks */,
 				8B41F6462DEDD0D5001A66F9 /* Products */,
 			);
@@ -155,9 +149,6 @@
 			);
 			dependencies = (
 				8B41F65E2DEDD0D6001A66F9 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				8B41F65F2DEDD0D6001A66F9 /* BasketWeavingConUITests */,
 			);
 			name = BasketWeavingConUITests;
 			packageProductDependencies = (

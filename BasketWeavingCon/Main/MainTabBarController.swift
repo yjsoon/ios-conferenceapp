@@ -11,7 +11,7 @@ class MainTabBarController: UITabBarController {
         // Create each tab's root view controller
         let generalInfoVC = GeneralInfoViewController()
         let talksVC = TalksPageViewController()
-        let nameCardVC = NameCardViewController()
+        let nameCardVC = NameCardDisplayViewController()
 
         // Configure tab bar items (icon and title shown in tab bar)
         generalInfoVC.tabBarItem = UITabBarItem(
